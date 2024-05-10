@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Handwritten Dataset Creator</title>
+  <style>
+    canvas {
+      border: 1px solid #000;
+    }
+  </style>
+</head>
+<body>
+  <h1>Handwritten Dataset Creator</h1>
+  <canvas id="drawingCanvas" width="512" height="512"></canvas>
+  <br>
+  <label for="classSelect">Select Class:</label>
+  <select id="classSelect">
+    <option value="0">0</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+    <option value="6">6</option>
+    <option value="7">7</option>
+    <option value="8">8</option>
+    <option value="9">9</option>
+  </select>
+  <br>
+  <button id="saveButton">Save Image</button>
+  <br>
+  <label for="thicknessInput">Line Thickness:</label>
+  <input type="number" id="thicknessInput" value="1">
+  <br>
+  <label for="rangeInput">Pixel Range:</label>
+  <input type="number" id="rangeInput" value="128">
+  <br>
+  <label for="fadingInput">Border Fading:</label>
+  <input type="number" id="fadingInput" value="0.5">
+  <br>
+  <button id="clearButton">Clear Canvas</button>
+
+  <script>
+    // Canvas and drawing context
+    const canvas = document.getElementById('drawingCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Variables for drawing
+    let isDrawing = false;
+    let lastX = 0;
+    let lastY = 0;
+    let classValue = '0';
+
+    // Event listeners for mouse events
+    canvas.addEventListener('mousedown', (e) => {
+      isDrawing = true;
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
+
+    canvas.addEventListener('mousemove', (e) => {
+      if (!isDrawing) return;
+      draw(e.offsetX, e.offsetY);
+      [lastX, lastY] = [e.offsetX, e.offsetY];
+    });
+
+    canvas.addEventListener('mouseup', () => {
+      isDrawing = false;
+    });
+
+    canvas.addEventListener('mouseout', () => {
+      isDrawing = false;
+    });
+
+    // Function to draw on the canvas
+    function draw(x, y) {
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = document.getElementById('thicknessInput').value;
+      ctx.stroke();
+    }
+
+    // Event listener for the save button
+    document.getElementById('saveButton').addEventListener('click', () => {
+      const imageData = canvas.toDataURL('image/png');
+      const classValue = document.getElementById('classSelect').value;
+      const lineThickness = document.getElementById('thicknessInput').value;
+      const pixelRange = document.getElementById('rangeInput').value;
+      const borderFading = document.getElementById('fadingInput').value;
+
+      google.script.run.saveImage(imageData, classValue, lineThickness, pixelRange, borderFading);
+
+      // Clear the canvas after saving
+      clearCanvas();
+    });
+
+    // Event listener for the clear button
+    document.getElementById('clearButton').addEventListener('click', clearCanvas);
+
+    // Function to clear the canvas
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+  </script>
+</body>
+</html>
